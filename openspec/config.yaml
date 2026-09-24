@@ -1,0 +1,29 @@
+schema: spec-driven
+
+context: |
+  Project: Projeto Integrador - Innovation Lab: Advanced No/Low Code (Faculdade IMPACTA).
+  Domain: Aplicação No/Low-Code com backend Xano e frontend Streamlit, desenvolvida no Antigravity.
+  Tech stack: Python 3.14, Streamlit, Xano (Backend / XanoScript), OpenSpec (SDD), Git/GitHub.
+  Frontend: Streamlit é a tecnologia obrigatória para implementação das interfaces frontend do projeto. Não introduzir outra tecnologia de frontend sem uma mudança explícita da decisão arquitetural.
+  Backend: Xano é a plataforma de backend, responsável pela modelagem de dados, autenticação e disponibilização de APIs REST.
+  Architecture: Backend no Xano responsável por regras de negócio e persistência. Frontend Streamlit consome endpoints Xano via HTTP. Frontend não deve ser considerado mecanismo de segurança exclusivo.
+  Development: Implementar mudanças incrementalmente utilizando OpenSpec. Mudanças relevantes devem ser especificadas antes da implementação.
+  Language: Escrever os artefatos OpenSpec em português brasileiro.
+
+rules:
+  proposal:
+    - Descrever claramente o problema, objetivo e escopo.
+    - Identificar o que está fora do escopo quando necessário.
+  specs:
+    - Escrever requisitos verificáveis.
+    - Utilizar cenários para comportamentos relevantes (sucesso e falha).
+  tasks:
+    - Dividir a implementação em tarefas pequenas e verificáveis.
+
+operations:
+  apply:
+    guidance:
+      - Executar verificações relevantes e testes funcionais antes de concluir as tarefas.
+  archive:
+    guidance:
+      - Confirmar que a implementação corresponde às especificações antes de arquivar.

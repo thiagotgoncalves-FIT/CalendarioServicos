@@ -1,0 +1,6 @@
+# Diretório reservado para sincronização de arquivos XanoScript (.xs) com o Xano CLI
+# Comandos principais:
+# xano auth
+# xano workspace pull -d ./xano
+# xano workspace push -d ./xano --dry-run
+# xano workspace push -d ./xano

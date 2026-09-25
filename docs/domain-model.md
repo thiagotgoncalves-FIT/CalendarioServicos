@@ -1,80 +1,147 @@
-# Modelo de Domínio — Projeto Integrador
+# Modelo de Domínio — AgendAí
 
-Este documento define os conceitos fundamentais do domínio da aplicação, suas responsabilidades, relacionamentos e regras estruturais essenciais. Ele serve para alinhar o entendimento conceitual antes das decisões locais de implementação.
+Este documento define os conceitos fundamentais do domínio da plataforma **AgendAí**, suas entidades, responsabilidades, atributos, relacionamentos e regras de negócio essenciais. Ele serve como alinhamento conceitual obrigatório para o design de tabelas no **Xano** e interfaces no **Streamlit**.
 
 ---
 
-## 1. Visão Geral das Entidades
+## 1. Diagrama de Relacionamento Conceitual
 
 ```text
-Usuario (Perfil / Auth)
-  │
-  ├── 1:N ── RegistroAtividade (Auditoria / Logs)
-  │
-  └── 1:N ── RecursoPrincipal (Entidade central do negócio)
-                 │
-                 └── 1:N ── ItemDetalhe (Atributos e sub-itens)
+       ┌──────────────────────┐
+       │       Usuario        │
+       │ (Prestador / Cliente)│
+       └──────────┬───────────┘
+                  │
+        ┌─────────┴──────────────────────┐
+        │ 1:N                            │ 1:N
+        ▼                                ▼
+┌────────────────┐              ┌────────────────┐
+│    Servico     │              │ Disponibilidade│
+│  (do Prestador)│              │  (Dias / Horas)│
+└───────┬────────┘              └────────────────┘
+        │
+        │ 1:N
+        ▼
+┌────────────────┐
+│  Agendamento   │◀───────────── (Cliente: Usuario)
+│ (Status/Datas) │
+└───────┬────────┘
+        │
+        │ 1:N
+        ▼
+┌────────────────┐
+│   Historico/   │
+│   Auditoria    │
+└────────────────┘
 ```
 
 ---
 
-## 2. Conceitos e Entidades Principais
+## 2. Entidades Principais
 
 ### 2.1 Usuário (`Usuario`)
-Representa qualquer agente humano que interage com o sistema autenticado.
+Representa tanto o prestador de serviço autônomo quanto o cliente que agenda os serviços.
 
-- **Responsabilidade**: Manter a identidade, credenciais e permissões de acesso ao sistema.
-- **Principais Informações**:
-  - `id`: Identificador único no backend Xano.
-  - `nome`: Nome completo do usuário.
-  - `email`: Endereço de e-mail (usado para login e contato).
-  - `role`: Perfil de acesso (ex.: Aluno, Professor, Administrador).
-  - `criado_em`: Data e hora de criação da conta.
-- **Relacionamentos**:
-  - Um usuário pode gerenciar múltiplos recursos e gerar múltiplos registros de atividade.
+- **Responsabilidade**: Gerenciamento de credenciais, perfil de acesso e informações de contato.
+- **Campos Principais**:
+  - `id`: Identificador único (Primary Key no Xano).
+  - `nome`: Nome completo ou nome fantasia do profissional.
+  - `email`: Endereço de e-mail (usado para autenticação; único no sistema).
+  - `senha`: Hash criptográfico da senha (gerenciado com segurança no Xano).
+  - `telefone`: WhatsApp ou telefone para contato/notificações.
+  - `role`: Perfil de acesso (`prestador`, `cliente` ou `admin`).
+  - `bio_descricao`: Breve descrição do perfil ou especialidade (relevante para prestadores).
+  - `criado_em`: Timestamp de criação do registro.
 - **Regras Estruturais**:
   - O e-mail deve ser único no sistema.
-  - Senhas são tratadas e criptografadas exclusivamente no Xano.
+  - O perfil define as telas e ações permitidas (um `cliente` não cadastra serviços de outros; um `prestador` gerencia sua própria agenda e serviços).
 
 ---
 
-### 2.2 Recurso Principal (`Recurso`)
-Representa o objeto central de valor da aplicação (ex.: Projeto, Tarefa, Pedido, Produto, Conforme o tema do grupo).
+### 2.2 Serviço (`Servico`)
+Representa cada tipo de atendimento ou serviço oferecido por um prestador independente.
 
-- **Responsabilidade**: Encapsular o ciclo de vida e estado do dado principal manipulado pelos usuários.
-- **Principais Informações**:
+- **Responsabilidade**: Definir o catálogo comercial, precificação e o tempo de execução do serviço.
+- **Campos Principais**:
   - `id`: Identificador único.
-  - `titulo`: Nome ou identificação descritiva do recurso.
-  - `descricao`: Detalhamento textual.
-  - `status`: Estado atual (ex.: Pendente, Em Progresso, Concluído, Cancelado).
-  - `criado_por`: Associação com o `Usuario` criador.
-  - `atualizado_em`: Data e hora da última modificação.
+  - `prestador_id`: Chave estrangeira referenciando o `Usuario` prestador dono do serviço.
+  - `titulo`: Nome do serviço (ex.: "Corte Degradê", "Treino Funcional 1h", "Manicure Tradicional").
+  - `descricao`: Detalhes sobre o que está incluso no serviço.
+  - `preco`: Valor cobrado em Reais (BRL, numérico decimal).
+  - `duracao_minutos`: Duração estimada em minutos (ex.: 30, 45, 60, 90). Essencial para cálculo de slots de agenda.
+  - `ativo`: Booleano (indica se o serviço está visível para novos agendamentos).
 - **Relacionamentos**:
-  - Pertence a um `Usuario`.
-  - Pode possuir uma lista de `ItemDetalhe`.
+  - Pertence a um `Usuario` (`prestador_id`).
+  - Pode ter múltiplos `Agendamento` associados.
 - **Regras Estruturais**:
-  - Um recurso não pode ser criado sem um criador autenticado válido.
-  - Apenas o criador ou administradores podem atualizar ou excluir o recurso.
+  - Apenas o prestador proprietário do serviço pode alterá-lo ou inativá-lo.
+  - `duracao_minutos` deve ser maior que zero (recomendado em múltiplos de 15 ou 30 minutos).
 
 ---
 
-### 2.3 Registro de Atividade / Auditoria (`RegistroAtividade`)
-Registra eventos relevantes ocorridos no sistema.
+### 2.3 Disponibilidade / Horário de Trabalho (`Disponibilidade`)
+Define a grade semanal de expediente e atendimento configurada pelo prestador.
 
-- **Responsabilidade**: Rastreabilidade e histórico de operações críticas.
-- **Principais Informações**:
+- **Responsabilidade**: Parametrizar em quais dias e horários o prestador aceita reservas.
+- **Campos Principais**:
   - `id`: Identificador único.
-  - `acao`: Descrição do evento (ex.: `CRIACAO_RECURSO`, `LOGIN`, `ALTERACAO_STATUS`).
-  - `data_hora`: Carimbo de tempo do evento.
-  - `usuario_id`: Usuário associado à ação.
-- **Relacionamentos**:
-  - Pertence a um `Usuario`.
+  - `prestador_id`: Chave estrangeira referenciando o `Usuario` prestador.
+  - `dia_semana`: Número ou identificador do dia (0 = Domingo, 1 = Segunda, ..., 6 = Sábado).
+  - `hora_inicio`: Horário inicial de atendimento (ex.: `09:00`).
+  - `hora_fim`: Horário de término do expediente (ex.: `18:00`).
+  - `intervalo_inicio`: Início da pausa/almoço (opcional, ex.: `12:00`).
+  - `intervalo_fim`: Fim da pausa/almoço (opcional, ex.: `13:00`).
+  - `ativo`: Booleano indicando se o dia está habilitado.
 - **Regras Estruturais**:
-  - Registros de auditoria são imutáveis (apenas inserção e leitura, sem exclusão física).
+  - `hora_inicio` deve ser estritamente anterior a `hora_fim`.
+  - Intervalos de pausa devem estar contidos dentro do período de atendimento.
 
 ---
 
-## 3. Diretrizes de Evolução do Modelo
-- Este modelo conceitual fornece a visão global inicial.
-- A persistência física (tabelas e campos específicos no Xano) será implementada de maneira incremental por meio das Changes do OpenSpec.
-- Novas entidades ou atributos devem ser propostos e revisados dentro do fluxo `explore → propose` do OpenSpec antes de serem criados no banco.
+### 2.4 Agendamento (`Agendamento`)
+Representa a reserva de um serviço em uma data e horário específicos entre um cliente e um prestador.
+
+- **Responsabilidade**: Orquestrar a reserva, controle de conflitos de horário e acompanhamento do ciclo de vida do atendimento.
+- **Campos Principais**:
+  - `id`: Identificador único.
+  - `prestador_id`: Chave estrangeira para o `Usuario` prestador.
+  - `cliente_id`: Chave estrangeira para o `Usuario` cliente solicitante.
+  - `servico_id`: Chave estrangeira para o `Servico` agendado.
+  - `data_hora_inicio`: Timestamp com a data e hora de início do atendimento.
+  - `data_hora_fim`: Timestamp com a data e hora de término (calculada a partir de `data_hora_inicio` + `duracao_minutos` do serviço).
+  - `valor_cobrado`: Snapshot do preço do serviço no momento do agendamento.
+  - `status`: Estado atual do agendamento (`pendente`, `confirmado`, `concluido`, `cancelado`).
+  - `observacoes`: Informações adicionais enviadas pelo cliente ou pelo prestador.
+  - `criado_em`: Data e hora de criação do agendamento.
+- **Relacionamentos**:
+  - Pertence a um `Usuario` prestador e a um `Usuario` cliente.
+  - Referencia um `Servico`.
+- **Regras Estruturais e de Negócio**:
+  - **Prevenção de Duplo Agendamento (Double Booking)**: Não é permitido criar ou confirmar um agendamento cujo intervalo `[data_hora_inicio, data_hora_fim]` colida com outro agendamento ativo (`pendente` ou `confirmado`) do mesmo prestador.
+  - **Bloqueio de Passado**: Agendamentos só podem ser marcados para datas/horários futuros.
+  - **Respeito à Grade**: O horário deve estar dentro do expediente ativo da `Disponibilidade` do prestador para aquele dia da semana.
+  - **Ciclo de Estados**:
+    - `pendente` ➔ Pode ir para `confirmado` ou `cancelado`.
+    - `confirmado` ➔ Pode ir para `concluido` ou `cancelado`.
+    - `concluido` / `cancelado` ➔ Estados terminais.
+
+---
+
+### 2.5 Registro de Atividade / Auditoria (`RegistroAtividade`)
+Registra transições e operações relevantes no sistema para fins de auditoria e notificações.
+
+- **Responsabilidade**: Histórico de ações e transparência.
+- **Campos Principais**:
+  - `id`: Identificador único.
+  - `agendamento_id`: Referência opcional ao agendamento afetado.
+  - `usuario_id`: Usuário que disparou a ação.
+  - `tipo_evento`: Código do evento (ex.: `AGENDAMENTO_CRIADO`, `AGENDAMENTO_CONFIRMADO`, `AGENDAMENTO_CANCELADO`).
+  - `descricao`: Mensagem descritiva do evento.
+  - `criado_em`: Timestamp do registro.
+
+---
+
+## 3. Diretrizes de Evolução e Persistência
+1. As tabelas correspondentes serão criadas e mantidas no **Xano**.
+2. Cada funcionalidade será proposta via OpenSpec (`/opsx-propose`), garantindo validação de payloads REST antes do desenvolvimento no frontend Streamlit.
+3. Regras de validação de horário e conflitos serão implementadas com lógica de backend no Xano para garantir robustez e segurança.

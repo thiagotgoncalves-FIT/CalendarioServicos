@@ -1,8 +1,15 @@
-# Projeto Integrador — Innovation Lab: Advanced No/Low Code
+# AgendAí — Plataforma de Gestão e Agendamento para Prestadores Independentes
 
 Projeto desenvolvido para a disciplina **Innovation Lab: Advanced No/Low Code** (Faculdade IMPACTA - Prof. Leonardo Bontempo).
 
 ---
+
+## 💡 Sobre o Projeto
+
+O **AgendAí** é uma solução web que simplifica a vida de profissionais autônomos (barbeiros, personal trainers, manicures, tutores, etc.) e seus clientes.
+- **O Problema**: Profissionais autônomos perdem tempo agendando horários manualmente pelo WhatsApp, sofrendo com conflitos de agenda e furos de clientes.
+- **A Solução**: O prestador cadastra seus serviços, preços e horários disponíveis. O cliente acessa um link, escolhe o serviço e faz o agendamento em poucos cliques.
+- **Diferencial**: Totalmente modelado com backend serverless no Xano, interface interativa em Streamlit e engenharia guiada por especificações via OpenSpec.
 
 ## 🛠️ Tecnologias Utilizadas
 

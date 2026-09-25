@@ -1,11 +1,13 @@
 schema: spec-driven
 
 context: |
-  Project: Projeto Integrador - Innovation Lab: Advanced No/Low Code (Faculdade IMPACTA).
-  Domain: Aplicação No/Low-Code com backend Xano e frontend Streamlit, desenvolvida no Antigravity.
+  Project: AgendAí — Plataforma de Gestão e Agendamento para Prestadores Independentes.
+  Academic: Projeto Integrador - Innovation Lab: Advanced No/Low Code (Faculdade IMPACTA - Prof. Leonardo Bontempo).
+  Domain: Plataforma web de agendamento online e gestão para prestadores de serviços autônomos (barbeiros, personal trainers, manicures, tutores) e seus clientes.
+  Core Value: Eliminar marcações manuais via WhatsApp, prevenir conflitos de agenda (double booking) e reduzir furos/no-shows com reserva em poucos cliques.
   Tech stack: Python 3.14, Streamlit, Xano (Backend / XanoScript), OpenSpec (SDD), Git/GitHub.
   Frontend: Streamlit é a tecnologia obrigatória para implementação das interfaces frontend do projeto. Não introduzir outra tecnologia de frontend sem uma mudança explícita da decisão arquitetural.
-  Backend: Xano é a plataforma de backend, responsável pela modelagem de dados, autenticação e disponibilização de APIs REST.
+  Backend: Xano é a plataforma de backend, responsável pela modelagem de dados, regras de negócio (disponibilidade, horários, cálculo de slots, conflitos), autenticação JWT e disponibilização de APIs REST.
   Architecture: Backend no Xano responsável por regras de negócio e persistência. Frontend Streamlit consome endpoints Xano via HTTP. Frontend não deve ser considerado mecanismo de segurança exclusivo.
   Development: Implementar mudanças incrementalmente utilizando OpenSpec. Mudanças relevantes devem ser especificadas antes da implementação.
   Language: Escrever os artefatos OpenSpec em português brasileiro.

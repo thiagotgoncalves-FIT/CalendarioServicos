@@ -1,69 +1,82 @@
-# Project Overview — Projeto Integrador (Innovation Lab)
+# Project Overview — AgendAí (Gestão e Agendamento para Prestadores Independentes)
 
 ## 1. Visão Geral
-Este repositório abriga o projeto integrador da disciplina **Innovation Lab: Advanced No/Low Code** (Faculdade IMPACTA). O objetivo do projeto é desenvolver uma aplicação completa orientada pelo paradigma **Spec-Driven Development (SDD)**, com apoio do agente de Inteligência Artificial no ambiente **Antigravity**.
+O **AgendAí** é uma plataforma web desenvolvida para simplificar e automatizar o processo de agendamento de horários e gestão de serviços para pequenos prestadores autônomos e independentes (barbeiros, personal trainers, manicures, tutores, psicólogos, massoterapeutas, entre outros) e seus clientes.
 
-## 2. Problema
-O desenvolvimento de produtos digitais frequentemente sofre com desalinhamento entre requisitos e código, complexidade de manutenção de backends tradicionais e amnésia de contexto em ferramentas de IA. Este projeto resolve esse problema através da combinação de um backend gerenciado (Xano), um frontend ágil em Python (Streamlit) e uma fundação documental sólida via OpenSpec.
+O projeto é concebido e desenvolvido no âmbito da disciplina **Innovation Lab: Advanced No/Low Code** (Faculdade IMPACTA - Prof. Leonardo Bontempo), utilizando o paradigma **Spec-Driven Development (SDD)** suportado pelo **OpenSpec**, com backend serverless no **Xano** e interface web ágil em **Streamlit**.
 
-## 3. Objetivos
-- Estabelecer uma aplicação robusta de ponta a ponta (Frontend, Backend, Integrações e Banco de Dados).
-- Conectar uma interface web moderna a endpoints de API REST no Xano.
-- Praticar desenvolvimento guiado por especificações estruturadas antes da implementação do código.
-- Garantir histórico versionado e rastreabilidade pelo Git/GitHub.
+## 2. O Problema
+Profissionais autônomos e microempreendedores individuais gastam em média de 1 a 3 horas diárias trocando mensagens manuais no WhatsApp para conciliar horários com clientes. Esse modelo descentralizado acarreta:
+- **Conflitos de agenda (Double Booking)**: Marcações duplicadas para o mesmo intervalo de tempo.
+- **Falta de comparecimento e furos (No-shows)**: Clientes esquecem horários agendados sem lembretes centralizados.
+- **Perda de clientes e faturamento**: Dificuldade em responder prontamente a solicitações em horários de atendimento ou fora do expediente comercial.
+- **Falta de visibilidade financeira e operacional**: Dificuldade em apurar o histórico de atendimentos e a previsão de receita semanal/mensal.
 
-## 4. Público-Alvo e Personas
-- **Usuários Finais**: Acessam a aplicação para realizar operações do domínio do sistema (consultar dados, submeter formulários, autenticar e acompanhar status).
-- **Administradores**: Gerenciam registros, configurações e permissões.
-- **Desenvolvedores / Alunos**: Evoluem as funcionalidades de forma iterativa via OpenSpec.
+## 3. A Solução
+O **AgendAí** oferece um fluxo simplificado e intuitivo de ponta a ponta:
+1. **Para o Prestador**:
+   - Cadastro e gestão do perfil profissional.
+   - Configuração de catálogo de serviços (título, descrição, duração e preço).
+   - Definição de horários de atendimento e dias de funcionamento.
+   - Painel de controle (Dashboard) com visualização dos agendamentos do dia, semana e status (Pendente, Confirmado, Concluído, Cancelado).
+2. **Para o Cliente**:
+   - Acesso simplificado ao catálogo de serviços do profissional.
+   - Seleção do serviço desejado e visualização em tempo real dos horários livres (evitando conflitos).
+   - Agendamento ágil em poucos cliques, com confirmação e histórico de agendamentos.
 
-## 5. Escopo Inicial (MVP)
-- **Fase 1 (Ambiente & Contexto)**: Estrutura base do projeto configurada (OpenSpec, Streamlit, Xano CLI e MCP, Git).
-- **Fase 2 (Backend Base no Xano)**: Modelagem de entidades essenciais, autenticação e primeiros endpoints REST.
-- **Fase 3 (Frontend Base no Streamlit)**: Telas de login/registro, listagem e formulários de cadastro.
-- **Fase 4 (Integração & Refinamento)**: Consumo das APIs do Xano no Streamlit, tratamento de erros e validações.
+## 4. Por que é Ideal para o Ciclo de 6 Meses
+- **Escopo Bem Definido e Focado**: Problema claro com limites bem delimitados, permitindo entrega de valor rápida e iterativa.
+- **Alto Valor Prático para Avaliação**: Resolve uma dor real de mercado com impacto imediato, facilitando a demonstração para bancas e professores.
+- **Cobertura de Regras de Negócio Críticas de Desenvolvimento Web**:
+  - Autenticação e Autorização (perfis distintos: Prestador vs. Cliente).
+  - CRUD Completo (Serviços, Horários de Trabalho e Agendamentos).
+  - Manipulação e Validação de Datas/Horários (cálculo de slots livres com base na duração do serviço, bloqueio de sobreposições e impedimento de marcações no passado).
+  - Transições de Estado de Negócio (Pendente ➔ Confirmado ➔ Concluído / Cancelado).
 
-## 6. Principais Funcionalidades
-- Autenticação e autorização de usuários.
-- Operações de leitura e escrita (CRUD) refletidas em tempo real no banco Xano.
-- Painéis informativos e formulários responsivos no Streamlit.
-- Tratamento resiliente de respostas de API e mensagens amigáveis de feedback.
+## 5. Público-Alvo e Personas
+- **Prestador de Serviço Independente (Persona Principal)**: Profissional autônomo que necessita gerenciar seu catálogo de serviços, sua agenda semanal e otimizar seu tempo de trabalho.
+- **Cliente Final**: Pessoa física que contrata os serviços do prestador e busca comodidade, transparência de preços e rapidez para reservar um horário.
+- **Administrador da Plataforma (Opcional/Futuro)**: Responsável por métricas globais, auditoria e suporte do sistema.
 
-## 7. Requisitos e Restrições Importantes
-- **Frontend**: Streamlit será utilizado como tecnologia exclusiva para implementação do frontend da aplicação.
-- **Backend**: Xano será a tecnologia de backend para regras de negócio, tabelas de banco de dados e APIs REST.
-- **Ambiente de IA**: Antigravity IDE utilizado em conjunto com o OpenSpec.
-- **Xano Developer MCP**: Utilizado pelo agente de IA para documentação e validação de XanoScript (`.xs`).
+## 6. Escopo do MVP (Milestones de 6 Meses)
+- **Fase 1 (Fundação & Setup)**: Estrutura base de SDD (OpenSpec), repositório Git, ambiente Streamlit e integração Xano CLI/MCP.
+- **Fase 2 (Autenticação & Perfis no Xano/Streamlit)**: Cadastro, login e segregação de permissões (Prestador vs. Cliente) com persistência no Xano.
+- **Fase 3 (Catálogo de Serviços & Disponibilidade)**: CRUD de serviços (nome, duração, valor) e configuração da grade de horários de trabalho do prestador.
+- **Fase 4 (Motor de Agendamento)**: Lógica no Xano para cálculo de horários livres, prevenção de conflitos de horário e criação do agendamento pelo cliente.
+- **Fase 5 (Gestão da Agenda & Status)**: Painel do prestador para aprovar, confirmar, concluir ou cancelar agendamentos, e tela de acompanhamento para o cliente.
+- **Fase 6 (Refinamento & Apresentação)**: Filtros, relatórios/métricas simples (total faturado, agendamentos realizados), validações de erro amigáveis e documentação final consolidada.
+
+## 7. Principais Funcionalidades do Sistema
+- **Módulo de Autenticação**: Cadastro/login com JWT seguro gerenciado pelo Xano.
+- **Módulo de Serviços**: Cadastro de serviços com título, descrição, duração (ex: 30min, 60min) e preço.
+- **Módulo de Horários**: Definição de dias da semana atendidos e intervalos de expediente.
+- **Módulo de Reserva**: Interface de seleção de data, visualização de horários disponíveis e submissão da reserva.
+- **Módulo de Gestão (Dashboard)**: Visualização da agenda diária/semanal e alteração dos status do agendamento.
+- **Módulo de Notificação/Feedback**: Mensagens contextuais e claras sobre o status das operações.
 
 ## 8. Arquitetura Tecnológica
-- **Frontend**: Streamlit (Python 3.14)
-- **Backend & Banco de Dados**: Xano (No-Code / Low-Code & XanoScript)
-- **Integração**: Requisições HTTP / REST (JSON)
-- **Desenvolvimento Assistido por IA**: OpenSpec (Spec-Driven Development)
-- **Controle de Versão**: Git & GitHub
+- **Frontend**: [Streamlit](https://streamlit.io/) (Python 3.14) — Tecnologia exclusiva para as interfaces web da aplicação.
+- **Backend & Banco de Dados**: [Xano](https://www.xano.com/) — Modelagem relacional, APIs REST, autenticação nativa e regras de negócio com XanoScript.
+- **Comunicação**: REST API via chamadas HTTP (JSON).
+- **Metodologia de Engenharia**: [OpenSpec](https://openspec.dev/) — Spec-Driven Development (SDD) com governança por IA.
+- **Ambiente de Desenvolvimento**: Google Antigravity IDE com Xano Developer MCP.
+- **Controle de Versão**: Git e GitHub.
 
 ## 9. Princípios de Desenvolvimento
-- Especificação antes da implementação (nenhum código sem spec correspondente).
-- Implementação incremental em fatias funcionais verticais.
-- Evitar retrabalho e manter a documentação viva sincronizada com o código.
-- Simplicidade e clareza no design e na lógica.
+- **Spec-Driven**: Nenhuma funcionalidade é codificada sem uma especificação prévia (`proposal.md`, `specs/`, `design.md`, `tasks.md`).
+- **Validação no Backend**: O cálculo de horários válidos e a integridade de dados devem ser garantidos no Xano (evitando concorrência ou reservas duplicadas).
+- **Simplicidade e Usabilidade**: Telas limpas, intuitivas e focadas na facilidade de uso para usuários não técnicos.
 
 ## 10. Segurança e Integridade
-- Regras de autorização e integridade de dados devem ser aplicadas no backend (Xano).
-- O frontend não deve ser considerado mecanismo de segurança exclusivo.
-- Credenciais e tokens sensíveis não devem ser comitados no repositório (`.env` protegido pelo `.gitignore`).
+- Senhas criptografadas exclusivamente pelo Xano (bcrypt).
+- Autenticação baseada em tokens com expiração e verificação de perfil de acesso (`role`).
+- Isolamento de dados: Um prestador só acessa e altera seus próprios serviços e agendamentos.
+- Variáveis sensíveis e URLs de API mantidas em `.env` (ignorado no Git).
 
-## 11. Estratégia de Desenvolvimento
-O desenvolvimento segue o ciclo em cinco etapas do OpenSpec:
-1. `Explore`: Análise e investigação antes da criação da mudança.
-2. `Propose`: Criação dos artefatos de especificação (`proposal.md`, `specs/`, `design.md`, `tasks.md`).
-3. `Review`: Validação humana dos requisitos e do design técnico.
-4. `Apply`: Implementação rigorosa do checklist definido em `tasks.md`.
-5. `Archive`: Consolidação da mudança na especificação permanente e histórico.
-
-## 12. Fonte de Verdade e Documentação
-- `docs/project-overview.md`: Apresentação global estável do projeto.
-- `docs/domain-model.md`: Modelo conceitual de domínio.
-- `AGENTS.md`: Diretrizes e regras operacionais para o agente Antigravity.
-- `openspec/specs/`: Requisitos consolidados do sistema.
-- `openspec/changes/`: Propostas de mudanças em andamento.
+## 11. Fonte de Verdade e Documentação
+- `docs/project-overview.md`: Este documento (visão e escopo global).
+- `docs/domain-model.md`: Modelo conceitual de entidades e regras de negócio.
+- `AGENTS.md`: Regras de conduta para o agente no Antigravity.
+- `openspec/config.yaml`: Diretrizes metodológicas do projeto.
+- `openspec/specs/`: Especificações consolidadas de funcionalidades.
+- `openspec/changes/`: Ciclos de propostas de novas fatias verticais.

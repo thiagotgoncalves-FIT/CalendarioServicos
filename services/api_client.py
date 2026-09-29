@@ -52,6 +52,11 @@ def post(endpoint: str, json_data: Optional[Dict[str, Any]] = None, token: Optio
             timeout=10
         )
         status_code = response.status_code
+
+        # LOG TEMPORÁRIO — diagnóstico do response bruto do Xano
+        import sys
+        print(f"[DEBUG API POST] url={full_url} | status={status_code} | raw_text={repr(response.text[:500])}", file=sys.stderr)
+
         try:
             data = response.json()
         except Exception:

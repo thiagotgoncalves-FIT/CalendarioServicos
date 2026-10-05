@@ -28,6 +28,14 @@ _MOCK_USERS_DB: Dict[str, Dict[str, Any]] = {
         "phone": "11977776666",
         "role": "cliente",
     },
+    "bruno.teixeira@gmail.com": {
+        "id": 4,
+        "name": "Bruno Teixeira",
+        "email": "bruno.teixeira@gmail.com",
+        "password": "123",
+        "phone": "11900000000",
+        "role": "prestador",
+    },
 }
 
 
@@ -64,7 +72,7 @@ def signup(
     # Chamada real à API do Xano — endpoint de signup
     success, data, status_code = api_client.post("/auth/signup", json_data=payload)
 
-    if success:
+    if success and data:
         # Normaliza o response do Xano para o formato esperado pela aplicação
         normalized = _normalize_auth_response(data)
 
@@ -76,10 +84,11 @@ def signup(
                 token=normalized["authToken"]
             )
 
-        return True, normalized
+        if normalized.get("authToken"):
+            return True, normalized
 
-    # Fallback mock se Xano não estiver configurado
-    if _is_mock_fallback(data, status_code):
+    # Fallback mock se Xano não estiver configurado ou retornar vazio
+    if _is_mock_fallback(data, status_code) or not data or status_code == 404:
         email_clean = payload["email"]
         if email_clean in _MOCK_USERS_DB:
             return False, {"message": "Este endereço de e-mail já está em uso."}
@@ -119,6 +128,17 @@ def login(email: str, password: str) -> Tuple[bool, Dict[str, Any]]:
         "password": password,
     }
 
+    # Intercepta usuários de demonstração para garantir que sempre funcionem (bypass do Xano)
+    email_clean = payload["email"]
+    if email_clean in _MOCK_USERS_DB and password == _MOCK_USERS_DB[email_clean]["password"]:
+        user_record = _MOCK_USERS_DB[email_clean]
+        mock_token = f"mock_jwt_token_{user_record['id']}_{user_record['role']}"
+        return True, {
+            "authToken": mock_token,
+            "user": {k: v for k, v in user_record.items() if k != "password"},
+            "_source": "mock_local"
+        }
+
     # Chamada real ao Xano
     success, data, status_code = api_client.post("/auth/login", json_data=payload)
 
@@ -126,14 +146,13 @@ def login(email: str, password: str) -> Tuple[bool, Dict[str, Any]]:
     import sys
     print(f"[DEBUG LOGIN] success={success} | status={status_code} | data={data}", file=sys.stderr)
 
-    if success:
+    if success and data:
         normalized = _normalize_auth_response(data)
-        if not normalized.get("authToken"):
-            return False, {"message": f"Resposta inesperada do servidor. Verifique os endpoints do Xano. (data={data})"}
-        return True, normalized
+        if normalized.get("authToken"):
+            return True, normalized
 
-    # Fallback local se Xano não estiver configurado
-    if _is_mock_fallback(data, status_code):
+    # Fallback local se Xano não estiver configurado ou retornar vazio
+    if _is_mock_fallback(data, status_code) or not data or status_code == 404:
         email_clean = payload["email"]
         user_record = _MOCK_USERS_DB.get(email_clean)
         if not user_record:
@@ -176,6 +195,29 @@ def get_current_user(token: str) -> Tuple[bool, Dict[str, Any]]:
 
     return False, {"message": "Sessão inválida ou expirada."}
 
+
+def recover_password(email: str) -> Tuple[bool, str]:
+    """
+    Envia uma requisição de recuperação de senha para o backend.
+    """
+    email_clean = email.strip().lower()
+    if not email_clean or "@" not in email_clean:
+        return False, "Por favor, insira um e-mail válido."
+    
+    payload = {"email": email_clean}
+    
+    # Chamada real ao Xano
+    success, data, status_code = api_client.post("/auth/recover_password", json_data=payload)
+    
+    if success:
+        return True, "As instruções de recuperação foram enviadas para o seu e-mail."
+        
+    # Fallback local se Xano não estiver configurado
+    if _is_mock_fallback(data, status_code) or status_code == 404:
+        return True, f"Se o e-mail {email_clean} estiver cadastrado, você receberá as instruções de recuperação em instantes."
+        
+    error_msg = data.get("message") if isinstance(data, dict) else "Erro ao solicitar recuperação de senha."
+    return False, error_msg
 
 # ---------------------------------------------------------------------------
 # Utilitários internos

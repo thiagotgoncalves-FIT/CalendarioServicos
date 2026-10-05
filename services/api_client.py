@@ -8,8 +8,8 @@ from typing import Any, Dict, Optional, Tuple
 import requests
 from dotenv import load_dotenv
 
-# Carrega variáveis de ambiente do arquivo .env
-load_dotenv()
+# Carrega variáveis de ambiente do arquivo .env com override
+load_dotenv(override=True)
 
 DEFAULT_API_URL = "https://sua-instancia.xano.io/api:agendai"
 API_BASE_URL = os.getenv("XANO_API_URL", DEFAULT_API_URL).rstrip("/")

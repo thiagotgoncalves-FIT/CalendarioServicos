@@ -33,13 +33,58 @@ Este documento estabelece as regras operacionais para qualquer agente de Intelig
 ---
 
 ## 4. Metodologia de Desenvolvimento (OpenSpec)
-- Todas as alterações funcionais e técnicas relevantes devem seguir rigorosamente o fluxo **Spec-Driven Development (SDD)** do OpenSpec:
-  1. `/opsx-explore`: Mapeamento de terreno e investigação conceitual (não gera código nem altera o banco).
-  2. `/opsx-propose`: Geração estruturada de artefatos (`proposal.md`, `specs/`, `design.md`, `tasks.md`).
-  3. **Revisão Humana**: Aguarde a validação do usuário antes de codificar.
-  4. `/opsx-apply`: Implementação guiada estritamente pelo checklist de `tasks.md`, marcando as tarefas à medida que forem concluídas.
-  5. `/opsx-archive`: Consolidação da especificação permanente em `openspec/specs/` e arquivamento do histórico.
-- Nunca tente construir todo o sistema de uma vez; decomponha o desenvolvimento em mudanças incrementais e verificáveis.
+
+**Regra absoluta**: Nenhuma funcionalidade nova pode ser implementada sem passar pelo ciclo completo abaixo. A IA propõe — o grupo decide — a IA implementa.
+
+```
+CONTEXTO GLOBAL (AGENTS.md + project-overview.md + domain-model.md + config.yaml)
+        |
+        v
+[1] /opsx-explore
+     Investigar o problema, mapear dependencias, entender o codigo existente.
+     NAO implementa codigo. NAO cria change ainda.
+     Resultado: clareza sobre o que sera feito.
+        |
+        v
+[2] /opsx-propose
+     Gera os artefatos da change:
+       proposal.md   -> Por que? O que muda? Escopo.
+       specs/        -> Comportamento esperado e verificavel.
+       design.md     -> Como sera implementado tecnicamente.
+       tasks.md      -> Checklist de tarefas pequenas e verificaveis.
+        |
+        v
+[3] REVIEW (obrigatorio pelo grupo)
+     proposal.md : problema claro? escopo adequado?
+     spec.md     : comportamento correto? casos de erro cobertos?
+     design.md   : solucao tecnica faz sentido com a arquitetura?
+     tasks.md    : tasks pequenas? todas necessarias e verificaveis?
+     --> Sem aprovacao humana explicita, NAO avancar para Apply.
+        |
+        v
+[4] /opsx-apply
+     Implementa seguindo tasks.md como checklist.
+     Marca [x] conforme cada tarefa e concluida.
+     Interrompe e consulta o grupo se surgir:
+       - decisao que contradiga o dominio;
+       - alteracao arquitetural significativa;
+       - escopo nao previsto.
+        |
+        v
+[5] /opsx-archive
+     Consolida a especificacao em openspec/specs/
+     Move a change concluida para openspec/changes/archive/
+        |
+        v
+  PROXIMA CHANGE -> voltar ao passo [1]
+```
+
+### Princípios do ciclo
+- **Vertical**: cada Change entrega backend + frontend integrados — nunca apenas banco ou apenas tela.
+- **Incremental**: uma funcionalidade por vez; nunca construir tudo de uma só vez.
+- **DB acompanha a feature**: a modelagem física no Xano evolui junto com as funcionalidades, não é criada toda de uma vez.
+- **Revisão humana é obrigatória**: a saída da IA não é automaticamente correta. O grupo analisa, aprova ou corrige antes de avançar.
+- **`config.yaml` context vs `spec`**: o `context` contém apenas o que se aplica a praticamente todas as changes; detalhes específicos de uma funcionalidade vão na respectiva `spec`.
 
 ---
 

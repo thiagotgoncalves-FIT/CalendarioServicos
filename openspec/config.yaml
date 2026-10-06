@@ -9,7 +9,7 @@ context: |
   Frontend: Streamlit é a tecnologia obrigatória para implementação das interfaces frontend do projeto. Não introduzir outra tecnologia de frontend sem uma mudança explícita da decisão arquitetural.
   Backend: Xano é a plataforma de backend, responsável pela modelagem de dados, regras de negócio (disponibilidade, horários, cálculo de slots, conflitos), autenticação JWT e disponibilização de APIs REST.
   Architecture: Backend no Xano responsável por regras de negócio e persistência. Frontend Streamlit consome endpoints Xano via HTTP. Frontend não deve ser considerado mecanismo de segurança exclusivo.
-  Development: Implementar mudanças incrementalmente utilizando OpenSpec. Mudanças relevantes devem ser especificadas antes da implementação.
+  Development: Toda nova funcionalidade deve obrigatoriamente seguir o ciclo Explore -> Propose -> Review -> Apply -> Archive antes de qualquer implementacao. Nenhum codigo e escrito sem artefatos aprovados pelo grupo.
   Language: Escrever os artefatos OpenSpec em português brasileiro.
 
 rules:
@@ -20,12 +20,19 @@ rules:
     - Escrever requisitos verificáveis.
     - Utilizar cenários para comportamentos relevantes (sucesso e falha).
   tasks:
-    - Dividir a implementação em tarefas pequenas e verificáveis.
+    - Dividir a implementação em tarefas pequenas, verticais e individualmente verificáveis.
+    - Cada tarefa deve cobrir tanto o backend (Xano) quanto o frontend (Streamlit) quando aplicável.
+    - Nunca criar tarefa para "criar o banco" de forma isolada; o banco evolui junto com a funcionalidade.
 
 operations:
   apply:
     guidance:
-      - Executar verificações relevantes e testes funcionais antes de concluir as tarefas.
+      - Seguir estritamente o checklist tasks.md, marcando [x] conforme cada tarefa e concluida.
+      - Interromper e consultar o grupo se surgir decisao que contradiga o dominio, altere a arquitetura ou expanda o escopo.
+      - Executar verificacoes funcionais e testes antes de marcar a tarefa como concluida.
+      - Nunca implementar funcionalidades fora do escopo da change atual sem aprovacao explicita.
   archive:
     guidance:
-      - Confirmar que a implementação corresponde às especificações antes de arquivar.
+      - Confirmar que toda implementacao corresponde as especificacoes antes de arquivar.
+      - Atualizar openspec/specs/ com o comportamento consolidado do que foi implementado.
+      - Verificar que tasks.md esta com todas as tarefas marcadas [x] antes do archive.

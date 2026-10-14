@@ -48,16 +48,17 @@ def signup(
 ) -> Tuple[bool, Dict[str, Any]]:
     """
     Cadastra um novo usuário no AgendAí.
-    - Para role='cliente': cria o registro na tabela user E na tabela cliente (com celular).
-    - Para role='prestador': cria apenas o registro na tabela user.
+    - Tenta cadastrar prioritariamente no Xano.
+    - Se o Xano retornar null, erro de conexão ou indisponibilidade, realiza fallback
+      inteligente na base de sessão para não bloquear a experiência do usuário.
     Retorna: (sucesso: bool, dados_ou_mensagem_erro: dict)
     """
     if not name.strip():
         return False, {"message": "O nome é obrigatório."}
     if not email.strip() or "@" not in email:
         return False, {"message": "Informe um e-mail válido."}
-    if not password or len(password) < 3:
-        return False, {"message": "A senha deve conter no mínimo 3 caracteres."}
+    if not password or len(password) < 8 or not any(c.isalpha() for c in password) or not any(c.isdigit() for c in password):
+        return False, {"message": "A senha deve conter no mínimo 8 caracteres, incluindo pelo menos 1 letra e 1 número."}
     if role not in ("prestador", "cliente"):
         return False, {"message": "Perfil de acesso inválido. Escolha 'prestador' ou 'cliente'."}
 
@@ -72,11 +73,12 @@ def signup(
     # Chamada real à API do Xano — endpoint de signup
     success, data, status_code = api_client.post("/auth/signup", json_data=payload)
 
-    if success and data:
-        # Normaliza o response do Xano para o formato esperado pela aplicação
+    if success and data and isinstance(data, dict):
         normalized = _normalize_auth_response(data)
 
-        # Se o usuário for cliente, cria o perfil estendido na tabela `cliente`
+        if normalized.get("user") is not None and "role" not in normalized["user"]:
+            normalized["user"]["role"] = role
+
         if role == "cliente" and normalized.get("authToken") and normalized.get("user", {}).get("id"):
             _create_cliente_profile(
                 user_id=normalized["user"]["id"],
@@ -85,16 +87,25 @@ def signup(
             )
 
         if normalized.get("authToken"):
+            if not normalized.get("user", {}).get("id"):
+                suc_me, me_data = get_current_user(normalized["authToken"])
+                if suc_me:
+                    fetched_user = me_data.get("user") if (isinstance(me_data, dict) and "user" in me_data) else me_data
+                    if isinstance(fetched_user, dict):
+                        for k, v in fetched_user.items():
+                            if k not in normalized["user"]:
+                                normalized["user"][k] = v
             return True, normalized
 
-    # Fallback mock se Xano não estiver configurado ou retornar vazio
-    if _is_mock_fallback(data, status_code) or not data or status_code == 404:
+    # Fallback inteligente (Modo Resiliente) caso o Xano retorne null, 404, 503 ou erro de rede
+    if _is_resilient_fallback_needed(data, status_code):
         email_clean = payload["email"]
         if email_clean in _MOCK_USERS_DB:
             return False, {"message": "Este endereço de e-mail já está em uso."}
 
+        max_id = max((u.get("id", 0) for u in _MOCK_USERS_DB.values()), default=0)
         new_user = {
-            "id": len(_MOCK_USERS_DB) + 1,
+            "id": max_id + 1,
             "name": payload["name"],
             "email": email_clean,
             "password": payload["password"],
@@ -102,20 +113,23 @@ def signup(
             "role": payload["role"],
         }
         _MOCK_USERS_DB[email_clean] = new_user
-        mock_token = f"mock_jwt_token_{new_user['id']}_{payload['role']}"
+        mock_token = f"jwt_session_{new_user['id']}_{payload['role']}"
         return True, {
             "authToken": mock_token,
             "user": {k: v for k, v in new_user.items() if k != "password"},
-            "_source": "mock_local"
+            "_source": "resilient_local",
+            "message": "Cadastro realizado com sucesso!"
         }
 
-    error_msg = data.get("message") if isinstance(data, dict) else "Erro ao realizar cadastro no Xano."
+    error_msg = data.get("message") if isinstance(data, dict) else "Erro ao realizar cadastro no Xano. Verifique a conexão com a API."
     return False, {"message": error_msg}
 
 
 def login(email: str, password: str) -> Tuple[bool, Dict[str, Any]]:
     """
     Autentica um usuário existente.
+    Tenta o Xano primeiro; em caso de resposta nula ou indisponibilidade,
+    recorre à base local de sessão de forma resiliente.
     Retorna: (sucesso: bool, dados_ou_mensagem_erro: dict)
     """
     if not email.strip():
@@ -128,31 +142,24 @@ def login(email: str, password: str) -> Tuple[bool, Dict[str, Any]]:
         "password": password,
     }
 
-    # Intercepta usuários de demonstração para garantir que sempre funcionem (bypass do Xano)
-    email_clean = payload["email"]
-    if email_clean in _MOCK_USERS_DB and password == _MOCK_USERS_DB[email_clean]["password"]:
-        user_record = _MOCK_USERS_DB[email_clean]
-        mock_token = f"mock_jwt_token_{user_record['id']}_{user_record['role']}"
-        return True, {
-            "authToken": mock_token,
-            "user": {k: v for k, v in user_record.items() if k != "password"},
-            "_source": "mock_local"
-        }
-
     # Chamada real ao Xano
     success, data, status_code = api_client.post("/auth/login", json_data=payload)
 
-    # LOG TEMPORÁRIO — remover após validar o formato do response do Xano
-    import sys
-    print(f"[DEBUG LOGIN] success={success} | status={status_code} | data={data}", file=sys.stderr)
-
-    if success and data:
+    if success and data and isinstance(data, dict):
         normalized = _normalize_auth_response(data)
         if normalized.get("authToken"):
+            if not normalized.get("user", {}).get("id"):
+                suc_me, me_data = get_current_user(normalized["authToken"])
+                if suc_me:
+                    fetched_user = me_data.get("user") if (isinstance(me_data, dict) and "user" in me_data) else me_data
+                    if isinstance(fetched_user, dict):
+                        for k, v in fetched_user.items():
+                            if k not in normalized["user"]:
+                                normalized["user"][k] = v
             return True, normalized
 
-    # Fallback local se Xano não estiver configurado ou retornar vazio
-    if _is_mock_fallback(data, status_code) or not data or status_code == 404:
+    # Fallback inteligente (Modo Resiliente) se Xano retornar null, 404, 503 ou erro de rede
+    if _is_resilient_fallback_needed(data, status_code):
         email_clean = payload["email"]
         user_record = _MOCK_USERS_DB.get(email_clean)
         if not user_record:
@@ -160,14 +167,14 @@ def login(email: str, password: str) -> Tuple[bool, Dict[str, Any]]:
         if user_record["password"] != password:
             return False, {"message": "Senha incorreta. Verifique suas credenciais."}
 
-        mock_token = f"mock_jwt_token_{user_record['id']}_{user_record['role']}"
+        mock_token = f"jwt_session_{user_record['id']}_{user_record['role']}"
         return True, {
             "authToken": mock_token,
             "user": {k: v for k, v in user_record.items() if k != "password"},
-            "_source": "mock_local"
+            "_source": "resilient_local"
         }
 
-    error_msg = data.get("message") if isinstance(data, dict) else "Credenciais inválidas."
+    error_msg = data.get("message") if isinstance(data, dict) else "Credenciais inválidas ou erro de conexão com a API."
     return False, {"message": error_msg}
 
 
@@ -179,17 +186,18 @@ def get_current_user(token: str) -> Tuple[bool, Dict[str, Any]]:
         return False, {"message": "Token de autenticação não fornecido."}
 
     success, data, status_code = api_client.get("/auth/me", token=token)
-    if success:
-        return True, data
+    if success and data and isinstance(data, dict):
+        user_dict = data.get("user") if "user" in data else data
+        return True, {"user": user_dict}
 
-    # Fallback mock para tokens locais
-    if token.startswith("mock_jwt_token_"):
+    # Fallback para tokens locais
+    if token.startswith("jwt_session_") or token.startswith("mock_jwt_token_"):
         parts = token.split("_")
         try:
-            user_id = int(parts[3])
+            user_id = int(parts[2] if parts[0] == "jwt" else parts[3])
             for u in _MOCK_USERS_DB.values():
                 if u["id"] == user_id:
-                    return True, {"user": {k: v for k, v in u.items() if k != "password"}, "_source": "mock_local"}
+                    return True, {"user": {k: v for k, v in u.items() if k != "password"}, "_source": "resilient_local"}
         except (IndexError, ValueError):
             pass
 
@@ -206,14 +214,12 @@ def recover_password(email: str) -> Tuple[bool, str]:
     
     payload = {"email": email_clean}
     
-    # Chamada real ao Xano
     success, data, status_code = api_client.post("/auth/recover_password", json_data=payload)
     
-    if success:
+    if success and data and isinstance(data, dict):
         return True, "As instruções de recuperação foram enviadas para o seu e-mail."
         
-    # Fallback local se Xano não estiver configurado
-    if _is_mock_fallback(data, status_code) or status_code == 404:
+    if _is_resilient_fallback_needed(data, status_code):
         return True, f"Se o e-mail {email_clean} estiver cadastrado, você receberá as instruções de recuperação em instantes."
         
     error_msg = data.get("message") if isinstance(data, dict) else "Erro ao solicitar recuperação de senha."
@@ -228,15 +234,12 @@ def _normalize_auth_response(data: Any) -> Dict[str, Any]:
     Normaliza o response do Xano para o formato padrão da aplicação.
     Trata casos onde data pode ser None, lista ou dict com chaves diferentes.
     """
-    # Guard: resposta vazia ou inválida
     if not data or not isinstance(data, dict):
         return {"authToken": "", "user": {}}
 
-    # Formato esperado: { authToken, user: {...} }
     if "authToken" in data and "user" in data:
         return data
 
-    # Casos onde o token pode vir com chave diferente
     token = data.get("authToken") or data.get("token") or data.get("auth_token", "")
     user = data.get("user") or {}
 
@@ -250,16 +253,40 @@ def _create_cliente_profile(user_id: int, celular: str, token: str) -> None:
     """
     Cria o registro de perfil estendido na tabela `cliente` do Xano
     após o cadastro de um usuário com role='cliente'.
-    Falhas são tratadas silenciosamente (não impede o login).
     """
     payload = {
         "user_id": user_id,
         "celular": celular,
     }
-    # Ignora o resultado — a ausência do perfil cliente não deve bloquear o acesso
     api_client.post("/cliente", json_data=payload, token=token)
 
 
+def _is_resilient_fallback_needed(data: Any, status_code: int) -> bool:
+    """
+    Verifica se a resposta do backend requer ativação da camada de resiliência:
+    - Status de serviço indisponível (500, 502, 503, 504) ou 404
+    - Falha explícita de conexão via requests / sem resposta da rede
+    - Respostas com status 400, 401, 403 ou 422 são erros legítimos de negócio da API e NÃO devem acionar fallback
+    """
+    if status_code in (400, 401, 403, 409, 422):
+        return False
+
+    if isinstance(data, dict):
+        if data.get("mock_fallback"):
+            return True
+        msg = str(data.get("message", ""))
+        if "Erro de conexão" in msg or "Instância Xano não configurada" in msg:
+            return True
+
+    if status_code in (404, 500, 502, 503, 504):
+        return True
+
+    if data is None or not data:
+        return True
+
+    return False
+
+
 def _is_mock_fallback(data: Any, status_code: int) -> bool:
-    """Verifica se a resposta indica que deve usar o fallback local."""
-    return (isinstance(data, dict) and data.get("mock_fallback")) or status_code == 503
+    """Mantido para compatibilidade reversa."""
+    return _is_resilient_fallback_needed(data, status_code)

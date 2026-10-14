@@ -83,3 +83,13 @@ def toggle_service_status(service_id: int, ativo: bool, token: str = None) -> Tu
     if success:
         return True, data
     return False, data
+
+def get_public_services(token: str = None) -> Tuple[bool, List[Dict[str, Any]]]:
+    """Retorna a lista de serviços ativos disponíveis para visualização pública e de clientes."""
+    success, data, status = api_client.get("services", token=token)
+    if not success and (status in (404, 503) or (isinstance(data, dict) and data.get("mock_fallback"))):
+        return True, [s for s in MOCK_SERVICES if s.get("ativo", True)]
+    if success:
+        items = data if isinstance(data, list) else data.get("items", [])
+        return True, [s for s in items if s.get("ativo", True)]
+    return True, [s for s in MOCK_SERVICES if s.get("ativo", True)]

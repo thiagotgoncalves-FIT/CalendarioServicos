@@ -19,5 +19,5 @@
 
 ## 4. Integração na Área do Cliente e Validação
 
-- [ ] 4.1 Implementar exibição do catálogo de serviços disponíveis na Área do Cliente para permitir visualização pública das ofertas.
-- [ ] 4.2 Testar a alternância entre prestador e cliente verificando consistência e isolamento dos dados.
+- [x] 4.1 Implementar exibição do catálogo de serviços disponíveis na Área do Cliente para permitir visualização pública das ofertas.
+- [x] 4.2 Testar a alternância entre prestador e cliente verificando consistência e isolamento dos dados.

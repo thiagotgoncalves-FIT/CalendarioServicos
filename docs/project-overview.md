@@ -112,8 +112,8 @@ O projeto é entregue em Changes sequenciais, cada uma com escopo vertical próp
 | Change | Nome | Status | Capabilities |
 |---|---|---|---|
 | C1 | `autenticacao-e-perfis` | ✅ Arquivada | Cadastro, login JWT, sessão, logout, roles |
-| C2 | `catalogo-e-disponibilidade` | 🔄 Em andamento | CRUD de serviços, grade semanal de horários |
-| C3 | `motor-de-agendamento` | ⏳ Planejada | Cálculo de slots livres, criação de reserva, anti-double-booking |
+| C2 | `catalogo-e-disponibilidade` | ✅ Arquivada | CRUD de serviços, grade semanal de horários |
+| C3 | `motor-de-agendamento` | ⏳ Planejada (Próxima) | Cálculo de slots livres, criação de reserva, anti-double-booking |
 | C4 | `gestao-agenda-e-status` | ⏳ Planejada | Painel do prestador, ciclo de status, histórico do cliente |
 | C5 | `refinamento-e-metricas` | ⏳ Planejada | Dashboard financeiro, filtros, UX final, documentacao |
 

@@ -21,7 +21,7 @@ Profissionais independentes gastam horas diárias trocando mensagens para concil
 - **Desorganização de catálogo e preços**: clientes sem clareza dos serviços oferecidos e valores.
 
 ### A Solução
-- **Para o Prestador**: cadastro de serviços com precificação e duração em minutos, definição de grade semanal de expediente com intervalo de almoço e painel administrativo da agenda com alteração de status (Confirmar, Concluir, Cancelar).
+- **Para o Prestador**: cadastro de serviços com precificação e duração em minutos, definição de grade semanal de expediente com intervalo de almoço, painel administrativo com alteração de status (Confirmar, Concluir, Cancelar), exportação de relatórios em CSV e botões de contato direto/lembrete via WhatsApp para eliminar *no-shows*.
 - **Para o Cliente**: acesso ao catálogo de serviços, seleção de datas com cálculo em tempo real de horários livres disponíveis (slots de 30 min), confirmação imediata da reserva e acompanhamento no painel "Meus Agendamentos".
 
 ---

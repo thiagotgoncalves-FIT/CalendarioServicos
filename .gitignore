@@ -36,3 +36,12 @@ yarn-error.log*
 .DS_Store
 Thumbs.db
 Desktop.ini
+
+# Database backups
+backups/
+*.backup
+*.bak
+
+# Temporary scratch files
+scratch/
+

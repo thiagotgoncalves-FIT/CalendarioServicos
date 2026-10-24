@@ -8,20 +8,11 @@ from . import api_client
 MOCK_SERVICES = [
     {
         "id": 1,
-        "prestador_id": 1,
-        "titulo": "Corte Degradê",
-        "descricao": "Corte masculino com acabamento na navalha.",
-        "preco": 45.0,
+        "prestador_id": 15,
+        "titulo": "Corte Masculino & Barba",
+        "descricao": "Atendimento completo com corte degradê e alinhamento de barba na navalha.",
+        "preco": 60.0,
         "duracao_minutos": 45,
-        "ativo": True,
-    },
-    {
-        "id": 2,
-        "prestador_id": 1,
-        "titulo": "Barba Terapia",
-        "descricao": "Alinhamento e hidratação da barba.",
-        "preco": 35.0,
-        "duracao_minutos": 30,
         "ativo": True,
     }
 ]

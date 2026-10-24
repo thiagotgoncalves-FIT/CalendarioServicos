@@ -28,12 +28,12 @@ _MOCK_USERS_DB: Dict[str, Dict[str, Any]] = {
         "phone": "11977776666",
         "role": "cliente",
     },
-    "bruno.teixeira@gmail.com": {
-        "id": 4,
-        "name": "Bruno Teixeira",
-        "email": "bruno.teixeira@gmail.com",
+    "hector.barros@aluno.impacta.edu.br": {
+        "id": 15,
+        "name": "Hector Barros",
+        "email": "hector.barros@aluno.impacta.edu.br",
         "password": "123",
-        "phone": "11900000000",
+        "phone": "11989898768",
         "role": "prestador",
     },
 }

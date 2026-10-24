@@ -28,3 +28,10 @@ O sistema DEVE carregar a grade semanal previamente configurada ao acessar a tel
 #### Scenario: Carregamento dos Horários Salvos
 - **WHEN** o prestador acessa a aba de horários de trabalho
 - **THEN** o sistema apresenta a grade com os dias selecionados e seus respectivos horários preenchidos
+
+### Requirement: Interface Ergonômica de Configuração da Grade
+O sistema DEVE prover na aba Grade de Atendimento uma visualização intuitiva e organizada por dia da semana, com seletores claros de ativação do dia, campos de horário de início, término e pausa configuráveis, validações em tempo real e mensagem de sucesso ao salvar via toast/notificação.
+
+#### Scenario: Salvamento com Feedback Visual da Grade
+- **WHEN** o prestador clica no botão "Salvar Grade de Atendimento" com horários válidos
+- **THEN** o sistema salva as alterações e exibe mensagem de confirmação sem recarregar desnecessariamente outros dados

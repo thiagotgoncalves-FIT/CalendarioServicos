@@ -10,22 +10,8 @@ from . import availability_service
 from . import catalog_service
 
 # Repositório de fallback em memória para execução resiliente
-MOCK_APPOINTMENTS: List[Dict[str, Any]] = [
-    {
-        "id": 1,
-        "prestador_id": 1,
-        "cliente_id": 2,
-        "servico_id": 1,
-        "servico_titulo": "Corte Degradê",
-        "data": (date.today() + timedelta(days=1)).strftime("%Y-%m-%d"),
-        "hora_inicio": "10:00",
-        "duracao_minutos": 45,
-        "valor_cobrado": 45.0,
-        "status": "confirmado",
-        "criado_em": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    }
-]
-_mock_appointment_id_counter = 2
+MOCK_APPOINTMENTS: List[Dict[str, Any]] = []
+_mock_appointment_id_counter = 1
 
 
 def _parse_time(time_str: str) -> Optional[time]:
@@ -188,7 +174,9 @@ def create_appointment(
     servico_id: int,
     data_str: str,
     hora_inicio: str,
-    token: Optional[str] = None
+    token: Optional[str] = None,
+    cliente_nome: Optional[str] = None,
+    cliente_telefone: Optional[str] = None
 ) -> Tuple[bool, Dict[str, Any]]:
     """
     Cria um novo agendamento com validação atômica anti-double-booking.
@@ -220,7 +208,9 @@ def create_appointment(
         "hora_inicio": hora_inicio,
         "duracao_minutos": duracao,
         "valor_cobrado": preco,
-        "status": "confirmado"
+        "status": "confirmado",
+        "cliente_nome": cliente_nome or "",
+        "cliente_telefone": cliente_telefone or ""
     }
 
     success, data, status = api_client.post("appointments", json_data=payload, token=token)
@@ -230,6 +220,8 @@ def create_appointment(
         new_app = {
             "id": _mock_appointment_id_counter,
             "cliente_id": cliente_id,
+            "cliente_nome": cliente_nome or f"Cliente #{cliente_id}",
+            "cliente_telefone": cliente_telefone or "",
             "prestador_id": prestador_id,
             "servico_id": servico_id,
             "servico_titulo": titulo,

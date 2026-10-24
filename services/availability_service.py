@@ -6,7 +6,7 @@ from . import api_client
 
 # Dados mockados
 MOCK_AVAILABILITY = {
-    1: [
+    15: [
         {"dia_semana": 1, "hora_inicio": "09:00", "hora_fim": "18:00", "intervalo_inicio": "12:00", "intervalo_fim": "13:00", "ativo": True},
         {"dia_semana": 2, "hora_inicio": "09:00", "hora_fim": "18:00", "intervalo_inicio": "12:00", "intervalo_fim": "13:00", "ativo": True},
         {"dia_semana": 3, "hora_inicio": "09:00", "hora_fim": "18:00", "intervalo_inicio": "12:00", "intervalo_fim": "13:00", "ativo": True},

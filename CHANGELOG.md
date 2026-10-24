@@ -4,7 +4,40 @@ Todas as alterações notáveis deste projeto serão documentadas neste arquivo 
 
 ---
 
-## [Unreleased] - 2026-10-13
+## [Unreleased] - 2026-10-24
+
+### Adicionado (feat / ui)
+- **Fechamento Operacional e Exportação (`arquivamento-mudancas-2026-10-24`)**:
+  - Exportação da lista de atendimentos filtrados em formato CSV (UTF-8 com BOM e colunas em português) via `st.download_button` no painel do prestador.
+  - Ação rápida de confirmação e lembrete com mensagem pré-formatada via WhatsApp (`https://wa.me/...`) nos cards de atendimento da agenda.
+  - Associação de nome e telefone do cliente no fluxo de criação de agendamento em `services/appointment_service.py`.
+
+---
+
+## [0.3.0] - 2026-10-18
+
+### Adicionado (feat / ui)
+- **Refatoração Completa do Painel do Prestador (`app.py` & `services/ui_utils.py`)**:
+  - Utilitários de formatação pt-BR para moeda brasileira (`R$ XX,XX`), datas por extenso e badges de status.
+  - Saudação personalizada no cabeçalho com nome do usuário e data de hoje formatada.
+  - Cartões de métricas neutros na aba Resumo (sem setas positivas quando valor for 0).
+  - Listagem dos atendimentos do dia com estado vazio amigável e encorajador.
+  - Agenda com filtros combinados de status e data, além de ações de confirmação e conclusão.
+  - Gestão de serviços com visual em cards e formulários com feedback em toasts.
+  - Nova especificação ativa consolidada: `openspec/specs/prestador-dashboard/spec.md`.
+
+### Modificado (chore / db)
+- **Limpeza de Dados e Alinhamento no Xano (`2026-10-18-limpeza-de-dados-xano`)**:
+  - Backup das tabelas e expurgo de dados de testes antigos.
+  - Padronização do usuário prestador Hector Barros no Xano.
+  - Sincronização dos arquivos `.xs` do Xano no repositório.
+- **Arquivamento OpenSpec**:
+  - `openspec/changes/archive/2026-10-18-melhoria-ui-painel-prestador`
+  - `openspec/changes/archive/2026-10-18-limpeza-de-dados-xano`
+
+---
+
+## [0.2.0] - 2026-10-13
 
 ### Adicionado (feat)
 - **Integração Real de Autenticação com o Xano**:

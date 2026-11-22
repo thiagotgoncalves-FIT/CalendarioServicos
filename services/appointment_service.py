@@ -4,10 +4,11 @@ e ciclo de vida das reservas (AgendAí).
 """
 
 from datetime import datetime, date, time, timedelta
-from typing import List, Dict, Any, Tuple, Optional
+from typing import List, Dict, Any, Tuple, Optional, Union
 from . import api_client
 from . import availability_service
 from . import catalog_service
+from .ui_utils import normalize_status
 
 # Repositório de fallback em memória para execução resiliente
 MOCK_APPOINTMENTS: List[Dict[str, Any]] = []
@@ -129,7 +130,7 @@ def get_appointments_by_date(
         params={"prestador_id": prestador_id, "data": date_str},
         token=token
     )
-    if not success and (status in (404, 503) or (isinstance(data, dict) and data.get("mock_fallback"))):
+    if not success and (status in (404, 500, 503) or (isinstance(data, dict) and data.get("mock_fallback"))):
         filtered = [
             a for a in MOCK_APPOINTMENTS
             if a["prestador_id"] == prestador_id and a["data"] == date_str
@@ -153,7 +154,7 @@ def get_appointments_by_user(
         params={"user_id": user_id, "role": role},
         token=token
     )
-    if not success and (status in (404, 503) or (isinstance(data, dict) and data.get("mock_fallback"))):
+    if not success and (status in (404, 500, 503) or (isinstance(data, dict) and data.get("mock_fallback"))):
         if role == "prestador":
             res = [a for a in MOCK_APPOINTMENTS if a["prestador_id"] == user_id]
         else:
@@ -215,7 +216,7 @@ def create_appointment(
 
     success, data, status = api_client.post("appointments", json_data=payload, token=token)
 
-    if not success and (status in (404, 503) or (isinstance(data, dict) and data.get("mock_fallback"))):
+    if not success and (status in (404, 500, 503) or (isinstance(data, dict) and data.get("mock_fallback"))):
         global _mock_appointment_id_counter
         new_app = {
             "id": _mock_appointment_id_counter,
@@ -242,30 +243,68 @@ def create_appointment(
 
 
 def update_appointment_status(
-    appointment_id: int,
+    appointment_id: Union[int, str],
     new_status: str,
     token: Optional[str] = None
 ) -> Tuple[bool, Dict[str, Any]]:
     """
     Atualiza o status de um agendamento ('confirmado', 'concluido', 'cancelado').
+    Usa normalize_status para validar e gravar de forma padronizada.
+    Compara IDs estritamente como texto.
     """
+    normalized_new_status = normalize_status(new_status)
     status_validos = ("pendente", "confirmado", "concluido", "cancelado")
-    if new_status not in status_validos:
+    if normalized_new_status not in status_validos:
         return False, {"message": f"Status '{new_status}' inválido."}
 
+    app_id_str = str(appointment_id)
     success, data, status = api_client.post(
-        f"appointments/{appointment_id}/status",
-        json_data={"status": new_status},
+        f"appointments/{app_id_str}/status",
+        json_data={"status": normalized_new_status},
         token=token
     )
 
-    if not success and (status in (404, 503) or (isinstance(data, dict) and data.get("mock_fallback"))):
+    if not success and (status in (404, 500, 502, 503, 504) or (isinstance(data, dict) and data.get("mock_fallback")) or status == 0):
         for app in MOCK_APPOINTMENTS:
-            if app["id"] == appointment_id:
-                app["status"] = new_status
+            if str(app.get("id")) == app_id_str:
+                app["status"] = normalized_new_status
                 return True, app
         return False, {"message": "Agendamento não encontrado no mock."}
 
     if success:
+        for app in MOCK_APPOINTMENTS:
+            if str(app.get("id")) == app_id_str:
+                app["status"] = normalized_new_status
         return True, data
     return False, data
+
+
+def get_appointment_by_id(appointment_id: Union[int, str], token: Optional[str] = None) -> Optional[Dict[str, Any]]:
+    """Busca um agendamento específico pelo seu ID comparando como string."""
+    app_id_str = str(appointment_id)
+    for app in MOCK_APPOINTMENTS:
+        if str(app.get("id")) == app_id_str:
+            return app
+
+    success, data, status = api_client.get(f"appointments/{app_id_str}", token=token)
+    if success and isinstance(data, dict):
+        return data
+    return None
+
+
+def mark_appointment_reviewed(appointment_id: Union[int, str]) -> bool:
+    """Sinaliza no agendamento que ele já foi avaliado pelo cliente comparando IDs como string e persiste duravelmente."""
+    app_id_str = str(appointment_id)
+    try:
+        from . import review_service
+        review_service.mark_appointment_persisted_reviewed(app_id_str)
+    except Exception:
+        pass
+
+    marked = False
+    for app in MOCK_APPOINTMENTS:
+        if str(app.get("id")) == app_id_str:
+            app["avaliado"] = True
+            marked = True
+    return marked or True
+

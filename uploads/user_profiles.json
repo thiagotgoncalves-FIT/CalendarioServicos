@@ -1,0 +1,16 @@
+{
+  "carlos@barbearia.com": {
+    "user_id": 1,
+    "email": "carlos@barbearia.com",
+    "name": "Carlos Augusto Barbeiro",
+    "phone": "11988889999",
+    "phone_formatted": "(11) 98888-9999"
+  },
+  "bruno.tmeira@aluno.impacta.edu.br": {
+    "user_id": 1,
+    "email": "bruno.tmeira@aluno.impacta.edu.br",
+    "name": "Bruno Teixeira",
+    "phone": "11952032458",
+    "phone_formatted": "(11) 95203-2458"
+  }
+}

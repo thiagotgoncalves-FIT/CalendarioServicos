@@ -80,3 +80,41 @@ O **AgendAí** oferece um fluxo simplificado e intuitivo de ponta a ponta:
 - `openspec/config.yaml`: Diretrizes metodológicas do projeto.
 - `openspec/specs/`: Especificações consolidadas de funcionalidades.
 - `openspec/changes/`: Ciclos de propostas de novas fatias verticais.
+
+---
+
+## 12. Processo de Desenvolvimento Obrigatório (OpenSpec SDD)
+
+Toda nova funcionalidade **obrigatoriamente** deve percorrer este ciclo antes de qualquer implementação:
+
+| Etapa | Comando | O que acontece | Pode escrever código? |
+|---|---|---|---|
+| 1. Explore | `/opsx-explore` | Investigar, mapear dependências, entender o problema | NÃO |
+| 2. Propose | `/opsx-propose` | Gerar `proposal.md`, `specs/`, `design.md`, `tasks.md` | NÃO |
+| 3. Review | *(manual)* | Grupo valida e aprova todos os artefatos | NÃO |
+| 4. Apply | `/opsx-apply` | Implementar seguindo `tasks.md` como checklist | SIM |
+| 5. Archive | `/opsx-archive` | Consolidar specs e arquivar a change concluída | NÃO |
+
+> **Regra de ouro**: A IA propõe — o grupo analisa — o grupo aprova — a IA implementa. A saída da IA não é automaticamente correta.
+
+### Princípios inegóciáveis
+- **Entrega vertical**: cada Change entrega uma fatia completa (Xano backend + Streamlit frontend + spec).
+- **Incremental**: uma funcionalidade por vez. Nunca implementar tudo de uma só vez.
+- **DB acompanha a feature**: tabelas são criadas no Xano na medida em que as funcionalidades são desenvolvidas — não antecipadamente.
+- **Escopo pequeno e verificável**: cada Change deve poder ser verificada de forma independente.
+
+---
+
+## 13. Roadmap de Changes (Fatias Verticais)
+
+O projeto é entregue em Changes sequenciais, cada uma com escopo vertical próprio:
+
+| Change | Nome | Status | Capabilities |
+|---|---|---|---|
+| C1 | `autenticacao-e-perfis` | ✅ Arquivada | Cadastro, login JWT, sessão, logout, roles |
+| C2 | `catalogo-e-disponibilidade` | ✅ Arquivada | CRUD de serviços, grade semanal de horários |
+| C3 | `motor-de-agendamento` | ⏳ Planejada (Próxima) | Cálculo de slots livres, criação de reserva, anti-double-booking |
+| C4 | `gestao-agenda-e-status` | ⏳ Planejada | Painel do prestador, ciclo de status, histórico do cliente |
+| C5 | `refinamento-e-metricas` | ⏳ Planejada | Dashboard financeiro, filtros, UX final, documentacao |
+
+> **Toda nova funcionalidade não prevista neste roadmap deve iniciar obrigatoriamente pelo `/opsx-explore` antes de qualquer proposta.**

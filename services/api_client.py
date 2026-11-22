@@ -8,8 +8,8 @@ from typing import Any, Dict, Optional, Tuple
 import requests
 from dotenv import load_dotenv
 
-# Carrega variáveis de ambiente do arquivo .env
-load_dotenv()
+# Carrega variáveis de ambiente do arquivo .env com override
+load_dotenv(override=True)
 
 DEFAULT_API_URL = "https://sua-instancia.xano.io/api:agendai"
 API_BASE_URL = os.getenv("XANO_API_URL", DEFAULT_API_URL).rstrip("/")
@@ -52,11 +52,6 @@ def post(endpoint: str, json_data: Optional[Dict[str, Any]] = None, token: Optio
             timeout=10
         )
         status_code = response.status_code
-
-        # LOG TEMPORÁRIO — diagnóstico do response bruto do Xano
-        import sys
-        print(f"[DEBUG API POST] url={full_url} | status={status_code} | raw_text={repr(response.text[:500])}", file=sys.stderr)
-
         try:
             data = response.json()
         except Exception:
